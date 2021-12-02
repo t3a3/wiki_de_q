@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="jp">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/main.css">
+    <title>WikipediaでQuiz</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.2.0/lib/p5.js"></script>
+</head>
+
+<body>
+    <!-------ポップアップ-------->
+    <div class="popup">
+        <div class="content">
+            <h2>問題にする単語を登録しよう！</h2>
+            <p>文字を入力してEnter
+            </p>
+            <div id="input_area">
+                <input id='input' value="" />
+            </div>
+            <button id="close">閉じる</button>
+        </div>
+    </div>
+    <!-------メイン画面-------->
+    <h1>WikipediaでQuiz</h1>
+    <button id="q_btn">問題を作る</button>
+    <p id="wiki_text">
+    </p>
+    <input id="kotae_text" value="" />
+    <div id="kotae_area">
+        <button id="kotae_btn">答える</button>
+    </div>
+    <p id="hantei"></p>
+    <!-------↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓-------->
+    <!-------↓↓↓Javascript↓↓↓-------->
+    <!-------↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓-------->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script>
+        ///////「問題を作る」ボタンを押した時の処理///////
+        $("#q_btn").on("click", function () {
+            $(".popup").addClass("show").fadeIn();
+        });
+        ///////「閉じる」ボタンを押した時の処理///////
+        $("#close").on("click", function () {
+            $(".popup").fadeOut();
+        });
+        ///////「答える」ボタンを押した時の処理///////
+        $("#kotae_btn").on("click", function () {
+            //問題となる単語が登録されてなかった時
+            if ($("#kotae_text").val() === "") {
+                alert("問題を作ってください")
+            }
+            //問題と答えの単語が一致した時
+            else if ($("#kotae_text").val() === $('#input').val()) {
+                alert("正解")
+                $("#input").val("");
+                $("#kotae_text").val("");
+                $("#wiki_text").html("");
+            }
+            //問題と答えの単語が一致しなかった時
+            else {
+                alert("不正解")
+                $("#kotae_text").val("");
+            }
+        });
+        ///////「MediaWiki API」の処理///////
+        let input = "";
+        const searchUrl = 'https://ja.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro&explaintext&redirects=1&titles='
+        console.log(searchUrl);
+
+        function setup() {
+            noCanvas();
+            input = select('#input');
+            input.changed(search);
+        }
+
+        function search() {
+            let url = searchUrl + input.value();
+            loadJSON(url, show, 'jsonp');
+        }
+
+        function show(data) {
+            for (let id in data.query.pages) {
+                console.log(data.query.pages[id].extract);
+                let links = data.query.pages[id].extract;
+                let links2 = links.substr(links.indexOf('。') + 1).replaceAll($("#input").val(), "?????")
+                //var links2 = links.replace($("#input").val(), "?????");
+                $("#wiki_text").html(links2);
+            }
+        }
+    </script>
+
+
+</body>
+
+</html>
